@@ -308,10 +308,11 @@ if(p.length<6)return e.textContent="Şifre en az 6 karakter olmalı.";if(p!=$("#
 e.textContent="Oluşturuluyor…";SETUP=1;try{let cr;try{cr=await FB.createFirst(mail(u),p)}catch(x){if(x.code=="auth/email-already-in-use")cr=await FB.signIn(mail(u),p);else throw x}
 const b=FB.writeBatch(FB.db);b.set(FB.doc(FB.db,"users",cr.user.uid),{username:u,role:"admin",active:true,created:today()});b.set(FB.doc(FB.db,"config","init"),{by:cr.user.uid,at:today()});await b.commit();SETUP=0;onAuth(cr.user)}
 catch(x){SETUP=0;e.textContent=aerr(x);try{await FB.signOut()}catch(_){}}}
-async function onAuth(u){if(SETUP)return;stopAll();ME=null;wd(u?"oturum kontrolü":"giriş ekranı");
+async function onAuth(u){if(SETUP)return;stopAll();ME=null;wd(u?"oturum kontrolü":"giriş ekranı");if(u)WD&&clearTimeout(WD),wd("oturum kontrolü");
 if(!u){let first=false;try{first=!(await FB.getDoc(FB.doc(FB.db,"config","init"))).exists()}catch(e){}return loginV(first)}
 document.body.classList.add("lg");$("nav").innerHTML="";$("main").innerHTML="<div class=login><h2>Giriş yapılıyor…</h2></div>";
-let s;try{s=await FB.getDoc(FB.doc(FB.db,"users",u.uid))}catch(e){wdOff();$("main").innerHTML=`<div class=login><div class=warn>${esc(aerr(e))}</div><button onclick="logout()">Çıkış</button></div>`;return}
+let s,err;for(let k=0;k<3&&!s;k++){try{s=await FB.getDoc(FB.doc(FB.db,"users",u.uid))}catch(e){err=e;if(e.code!="unavailable")break;$("main").innerHTML=`<div class=login><h2>Bağlanılıyor… (${k+2}/3)</h2></div>`;await new Promise(r=>setTimeout(r,2500))}}
+if(!s){wdOff();$("main").innerHTML=`<div class=login><div class=warn>${esc(aerr(err))}<br><small>Kod: ${esc(err&&err.code||"")}</small></div><button onclick="location.reload()">Tekrar Dene</button><button class=g style="margin-top:8px" onclick="logout()">Çıkış</button></div>`;return}
 if(!s.exists()||!s.data().active){wdOff();$("main").innerHTML=`<div class=login><div class=warn>Bu hesap aktif değil veya yetkisi yok. Yöneticinize başvurun.</div><button onclick="logout()">Çıkış</button></div>`;return}
 ME={uid:u.uid,...s.data()};setRole(ME.role);document.body.classList.remove("lg");window.svt="";wd("kayıtlar yükleniyor");listen()}
 async function logout(){if(tmr){clearTimeout(tmr);try{await wr()}catch(e){}}try{await FB.signOut()}catch(e){}}
@@ -349,7 +350,7 @@ const C=FIREBASE_CONFIG;
 if(!C.apiKey||!C.projectId)return showSetup();
 if(!window.firebase||!firebase.firestore||!firebase.auth)return fbFail();
 const app=firebase.initializeApp(C),auth=app.auth(),db=app.firestore();
-try{db.settings({ignoreUndefinedProperties:true,experimentalAutoDetectLongPolling:true,merge:true})}catch(e){}
+try{db.settings({ignoreUndefinedProperties:true,experimentalForceLongPolling:true,merge:true})}catch(e){try{db.settings({ignoreUndefinedProperties:true,experimentalForceLongPolling:true})}catch(_){}}
 const W=s=>({id:s.id,exists:()=>s.exists,data:()=>s.data()});
 window.FB={app,auth,db,
  doc:(d,...p)=>db.doc(p.join("/")),collection:(d,...p)=>db.collection(p.join("/")),
