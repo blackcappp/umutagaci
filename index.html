@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8"><title>Umut Ağacı – Köpek Kayıt ve Aşı Takip Programı</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box}body{margin:0;font:14px Arial,sans-serif;display:flex;height:100vh;color:#222;background:#f4f6f5}
+nav{width:215px;background:#1f5c3a;color:#fff;padding:10px;overflow:auto;flex:none}
+nav h1{font-size:15px;margin:8px 4px 16px;line-height:1.3}nav small{font-weight:400;font-size:11px;opacity:.8}
+nav a{display:block;padding:9px 10px;border-radius:6px;cursor:pointer;margin-bottom:2px}nav a.on,nav a:hover{background:#2f7a50}
+.who{margin:18px 4px 6px;padding-top:10px;border-top:1px solid #ffffff40;font-size:13px}
+.burger{display:none}
+main{flex:1;overflow:auto;padding:18px}h2{margin:0 0 12px;color:#1f5c3a}.n{color:#c00000}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+input,select,button{font:inherit;padding:7px 9px;border:1px solid #bbb;border-radius:6px;background:#fff}
+input:disabled,select:disabled{background:#f2f2f2;color:#333}
+button{background:#1f5c3a;color:#fff;border:0;cursor:pointer}button.g{background:#888}button.r{background:#c00000}button:hover{opacity:.85}
+table{border-collapse:collapse;width:100%;background:#fff}th{background:#1f5c3a;color:#fff;padding:8px;text-align:left;font-size:13px}
+td{padding:7px 8px;border-bottom:1px solid #e3e3e3}tr.late td{background:#ffd6da}tr.done td{background:#d5f0dc}
+.cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;align-items:flex-start}.card{background:#fff;border-radius:10px;padding:14px 18px;min-width:150px;cursor:pointer;border-left:6px solid #1f5c3a;box-shadow:0 1px 3px #0002}
+.card b{font-size:26px;display:block}.chip{display:inline-block;background:#e8f3ec;border:1px solid #1f5c3a;border-radius:14px;padding:4px 11px;margin:0 6px 6px 0;cursor:pointer}
+#ov{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:9}
+.box{background:#fff;border-radius:10px;padding:18px;width:min(900px,95vw);max-height:92vh;overflow:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}label{display:block;font-size:12px;color:#555}label input,label select{width:100%;margin-top:3px;color:#000}
+.warn{background:#fff3cd;border:1px solid #e0b400;padding:10px;border-radius:8px;margin-bottom:12px}
+.hb{padding:2px 9px;border-radius:10px;color:#fff;font-size:12px;font-weight:700}.ha{background:#2e9e4f}.hi{background:#d32f2f}select.ha{background:#2e9e4f;color:#fff}select.hi{background:#d32f2f;color:#fff}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:8px}.cols>div{background:#f6f8f7;border-radius:8px;padding:10px}.vr{padding:5px 0;border-bottom:1px solid #e3e3e3}.vr button{padding:2px 8px;margin-left:6px;font-size:12px}
+.tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}.tab{padding:9px 18px;border-radius:8px 8px 0 0;background:#ddd;cursor:pointer;font-weight:700}.tab.on{background:#1f5c3a;color:#fff}
+.x{float:right;position:sticky;top:0;z-index:2;background:#d32f2f;width:34px;height:34px;padding:0;font-size:18px;border-radius:50%}
+.col{width:170px;flex:none}.col .card{min-width:0;width:100%;margin-bottom:8px}.mini{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:8px;padding:6px 12px;margin-bottom:6px;border-left:4px solid #8fbf9f;box-shadow:0 1px 2px #0002}.mini b{font-size:15px}
+.ph{display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap}.ph img{width:110px;height:110px;object-fit:cover;border-radius:10px;background:#e3e3e3;border:1px solid #bbb}
+.full{width:100vw!important;max-width:none!important;height:100vh;max-height:100vh!important;border-radius:0}.full .grid{grid-template-columns:repeat(4,1fr)}@media(max-width:1100px){.full .grid{grid-template-columns:repeat(2,1fr)}}
+body.lg nav{display:none}
+.login{max-width:400px;margin:7vh auto;background:#fff;padding:22px;border-radius:12px;box-shadow:0 2px 12px #0002}
+.login label{margin-bottom:12px;font-size:13px}.login button{width:100%;padding:12px;margin-top:4px;font-size:16px}
+.login pre{background:#f4f4f4;padding:10px;border-radius:8px;overflow:auto;font-size:11.5px;max-height:260px}
+.login ol li{margin-bottom:8px;line-height:1.45}
+/* ---- Mobil ---- */
+@media(max-width:800px){
+ body{display:block;height:auto;min-height:100vh}
+ nav{width:auto;position:sticky;top:0;z-index:8;padding:8px 12px;overflow:visible}
+ nav .top{display:flex;justify-content:space-between;align-items:center}
+ nav h1{margin:0;font-size:15px}nav h1 br,nav h1 small{display:none}
+ .burger{display:block;background:#2f7a50;font-size:22px;padding:4px 14px}
+ .menu{display:none;max-height:78vh;overflow:auto;padding-top:8px}body.mo .menu{display:block}
+ nav a{padding:12px 10px}
+ main{padding:12px;overflow:visible}
+ input,select,button{font-size:16px}
+ .bar input:not([type=file]):not([type=checkbox]){flex:1 1 100%}
+ .card{min-width:0;flex:1 1 40%;padding:12px}
+ .col{width:calc(50% - 6px)}
+ .cols{grid-template-columns:1fr}
+ .grid,.full .grid{grid-template-columns:1fr 1fr}
+ .box{width:100vw;max-height:100vh;height:100vh;border-radius:0;padding:12px}
+ table.rs,table.rs tbody,table.rs tr,table.rs td{display:block;width:100%}
+ table.rs{background:none}
+ table.rs tr.hr{display:none}
+ table.rs tr{margin-bottom:10px;border:1px solid #d8dcd9;border-radius:10px;background:#fff;overflow:hidden}
+ table.rs td{display:flex;justify-content:space-between;gap:12px;text-align:right;padding:8px 10px}
+ table.rs td::before{content:attr(data-l);font-weight:700;color:#555;text-align:left;flex:none}
+ table.rs td:empty{display:none}
+ table.rs td:last-child{justify-content:flex-end}
+}
+@media(max-width:480px){.grid,.full .grid{grid-template-columns:1fr}.col .card{padding:10px}.mini{padding:5px 9px}}
+@media print{nav,.bar,button{display:none!important}body{display:block;height:auto}}
+</style></head><body>
+<nav></nav><main><h2>Yükleniyor…</h2></main><div id="ov"></div>
+
+<script>
+/* =====================================================================
+   AYARLAR — Firebase konsolundan aldığınız bilgileri buraya yapıştırın
+   (Proje ayarları ⚙ → Genel → Uygulamalarınız → firebaseConfig)
+   ===================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDy8XbStPYZNxGBdEahEx2wS2qq-1VmmUQ",
+  authDomain: "umutagaci-779be.firebaseapp.com",
+  projectId: "umutagaci-779be",
+  storageBucket: "umutagaci-779be.firebasestorage.app",
+  messagingSenderId: "883409553078",
+  appId: "1:883409553078:web:86a8e5c0ea612233dcc817"
+};
+/* Kullanıcı adları arka planda bu uzantıyla saklanır (değiştirmeyin) */
+const USER_DOMAIN = "umutagaci.app";
+</script>
+
+<script>
+const RULES=`rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signed() { return request.auth != null; }
+    function uref() { return /databases/$(database)/documents/users/$(request.auth.uid); }
+    function ok() { return signed() && exists(uref()) && get(uref()).data.active == true; }
+    function role() { return get(uref()).data.role; }
+    function isAdmin() { return ok() && role() == 'admin'; }
+    function canEdit() { return ok() && role() in ['admin', 'editor']; }
+    function canRead() { return ok() && role() in ['admin', 'editor', 'viewer']; }
+    function keepsKeys() { return request.resource.data.r.keys().hasAll(resource.data.r.keys()); }
+
+    match /config/init {
+      allow read: if true;
+      allow create: if signed()
+        && !exists(/databases/$(database)/documents/config/init)
+        && getAfter(uref()).data.role == 'admin';
+    }
+    match /config/{d} {
+      allow read: if canRead();
+      allow write: if isAdmin() && d != 'init';
+    }
+    match /users/{uid} {
+      allow read: if signed() && (request.auth.uid == uid || isAdmin());
+      allow create: if isAdmin() || (signed() && request.auth.uid == uid
+        && request.resource.data.role == 'admin'
+        && request.resource.data.active == true
+        && !exists(/databases/$(database)/documents/config/init)
+        && existsAfter(/databases/$(database)/documents/config/init));
+      allow update, delete: if isAdmin();
+    }
+    match /dogs/{b} {
+      allow read: if canRead();
+      allow create: if canEdit();
+      allow update: if isAdmin() || (canEdit() && keepsKeys());
+      allow delete: if isAdmin();
+    }
+    match /vac/{b} {
+      allow read: if canRead();
+      allow create: if canEdit();
+      allow update: if isAdmin() || (canEdit() && keepsKeys());
+      allow delete: if isAdmin();
+    }
+    match /photos/{p} {
+      allow read: if canRead();
+      allow create, update, delete: if canEdit();
+    }
+  }
+}`;
+
+const S=["Yaşam Alanında","Tedavide","Sahiplendirildi","Sevk Edildi"];
+const AŞI=["DHPPi+L","Kuduz","Bronchine","Corona","Lyme","İç Parazit","Dış Parazit","İç+Dış Parazit"];
+const RN={admin:"Yönetici",editor:"Kayıt Sorumlusu",viewer:"Görüntüleyici"};
+let D={dogs:[],vac:[]},ME=null,CAN={edit:false,del:false,admin:false},SETUP=0,STARTED=0;
+const setRole=r=>{CAN={edit:r=="admin"||r=="editor",del:r=="admin",admin:r=="admin"}};
+const newPid=()=>"p"+Date.now()+Math.random().toString(36).slice(2,6);
+function norm(){D.dogs=D.dogs||[];D.vac=D.vac||[];D.vac.forEach(v=>{if(v.type=="Karma (DHPPi)")v.type="DHPPi+L";if(v.type=="Bordetella (Kennel Cough)")v.type="Bronchine"});D.dogs.forEach(d=>{if(d.status=="Öldü"){d.deathDate=d.deathDate||d.sdate||today();d.deathReason=d.deathReason||d.reason;d.status=""}});D.dogs.forEach(d=>{if(d.photo){d.pid=d.pid||newPid();pput(d.pid,d.photo).catch(()=>{});delete d.photo}})}
+let tmr=0;const $=s=>document.querySelector(s);
+const upd=()=>{const t=document.getElementById("sv");if(t)t.textContent=window.svt||""};
+const save=()=>{if(!CAN.edit)return;clearTimeout(tmr);window.svt="⏳ Kaydediliyor…";upd();tmr=setTimeout(wr,400)};
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const addDays=n=>{let d=new Date(today());d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const fd=d=>d?d.split("-").reverse().join("."):"",esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const BR=["Akbaş","Alman Çoban Köpeği","Anadolu Çoban Köpeği","Akita","Alaskan Malamute","Basset Hound","Beagle","Belçika Malinois","Bernese Dağ Köpeği","Bichon Frise","Border Collie","Boxer","Bulldog","Cane Corso","Chihuahua","Chow Chow","Cocker Spaniel","Collie","Dachshund (Sosis)","Dalmaçyalı","Doberman","English Setter","Fransız Bulldog","Golden Retriever","Husky (Sibirya)","Irish Setter","Jack Russell Terrier","Kangal","Karabaş","Kaniş (Poodle)","Labrador Retriever","Leonberger","Maltese Terrier","Melez","Pekinez","Pitbull Terrier","Pomeranian","Puanter","Pug","Rottweiler","Saint Bernard","Samoyed","Schnauzer","Shih Tzu","Staffordshire Terrier","Tazı","Terrier","Yorkshire Terrier","Diğer"];
+const F=[["chip","Çip No"],["chip2","2. Çip No"],["tag","Küpe No"],["protocol","Protokol No"],["group","Grup"],["haybis","HAYBİS",["Aktif","İnaktif"]],["cage","Kafes No"],["name","Köpek Adı"],["type","Cins"],["breed","Irk"],["sex","Cinsiyet",["Erkek","Dişi"]],["age","Yaş (yıl)"],["color","Renk"],["size","Boyut",["Küçük","Orta","Büyük"]],["neut","Kısırlaştırıldı mı",["Evet","Hayır"]],["neutDate","Kısırlaştırma Tarihi",0,"date"],["entry","Giriş Tarihi",0,"date"],["status","Durum",S],["sdate","Durum Tarihi",0,"date"],["deathDate","Ölüm Tarihi (öldüyse)",0,"date"],["deathReason","Ölüm Sebebi"],["reason","Sebep (Tedavi / Sevk)"],["adopter","Sahiplenen Ad Soyad"],["phone","Sahiplenen Telefon"],["addr","Sahiplenen Adres"],["place","Sevk Edilen Yer"],["note","Not"]];
+const lab=Object.fromEntries(F.map(f=>[f[0],f[1]])),DK=["entry","sdate","neutDate","deathDate"];
+const dogOf=c=>D.dogs.find(x=>x.chip==c||(x.chip2&&x.chip2==c));
+const chipMap=()=>{const m={};D.dogs.forEach(d=>{if(d.chip)m[d.chip]=d;if(d.chip2)m[d.chip2]=d});return m};
+/* Aktif köpek: ölmemiş, sahiplendirilmemiş, sevk edilmemiş */
+const isAct=d=>d&&!d.deathDate&&d.status!=S[2]&&d.status!=S[3];
+const vacOf=d=>D.vac.map((v,i)=>({...v,i})).filter(v=>v.chip==d.chip||(d.chip2&&v.chip==d.chip2));
+const nextVac=d=>vacOf(d).filter(v=>v.st=="Bekliyor").map(v=>v.date).sort()[0]||"";
+const val=(d,k)=>k=="next"?fd(nextVac(d)):k=="type"?"Köpek":k=="status"&&d.deathDate?"Öldü":DK.includes(k)?fd(d[k]):(d[k]??"");
+const hcl=v=>v=="Aktif"?"ha":v=="İnaktif"?"hi":"",hb=v=>v?`<span class="hb ${hcl(v)}">${v}</span>`:"";
+const L2=c=>Array.isArray(c)?c[1]:c=="next"?"Sonraki Randevu":lab[c],K2=c=>Array.isArray(c)?c[0]:c;
+const idx=()=>D.dogs.map((d,i)=>({...d,_i:i}));
+function tbl(rows,cols){return`<table class=rs><tr class=hr>${cols.map(c=>`<th>${L2(c)}</th>`).join("")}<th></th></tr>${rows.map(d=>`<tr>${cols.map(c=>`<td data-l="${esc(L2(c))}">${K2(c)=="haybis"?hb(d.haybis):esc(val(d,K2(c)))}</td>`).join("")}<td><button onclick="edit(${d._i})">Aç</button></td></tr>`).join("")||"<tr><td colspan=20>Kayıt yok</td></tr>"}</table>`}
+const base=["chip","chip2","tag","protocol","name","breed","sex","age"];
+const LV={dogs:[null,"Tüm Köpekler",["chip","chip2","tag","protocol","group","haybis","cage","name","breed","sex","age","size","status","next"]],
+tedavi:["Tedavide","Tedavi ve Rehabilitasyon Merkezindeki Köpekler",[...base,["sdate","Sevk Tarihi"],["reason","Tedavi Sebebi"],["cage","Önceki Kafes"]]],
+sahip:["Sahiplendirildi","Sahiplendirilen Köpekler",[...base,["sdate","Sahiplenme Tarihi"],["adopter","Sahiplenen"],["phone","Telefon"],"addr"]],
+sevk:["Sevk Edildi","Sevk Edilen Köpekler (Yaşlılık / Saldırganlık / Diğer)",[...base,["sdate","Sevk Tarihi"],["reason","Sevk Sebebi"],["place","Sevk Edilen Yer"]]],
+olen:["Öldü","Ölen Köpekler",[...base,["deathDate","Ölüm Tarihi"],["deathReason","Ölüm Sebebi"],["cage","Son Kafes"]]]};
+let cur="ozet",st={q:"",cage:"",from:today(),to:today(),aktif:1};
+const NAV=[["ozet","Özet"],["dogs","Köpek Kayıt"],["kafes","Kafesler"],["tedavi","Tedavi"],["sahip","Sahiplendirilenler"],["sevk","Sevk Edilenler"],["olen","Ölenler"],["rand","Randevular (Aşı)"],["yedek","Yedekleme",1],["kul","Kullanıcılar",1]];
+function go(v,keep){if(NAV.some(n=>n[0]==v&&n[2])&&!CAN.admin)v="ozet";cur=v;
+if(!keep){document.body.classList.remove("mo");$("nav").innerHTML=`<div class=top><h1>🐾 UMUT AĞACI<br><small>Doğal Yaşam ve Sahiplendirme Merkezi<br>Nilüfer Belediyesi</small></h1><button class=burger onclick="document.body.classList.toggle('mo')" aria-label="Menü">☰</button></div><div class=menu>`+NAV.filter(n=>!n[2]||CAN.admin).map(([k,t])=>`<a class="${k==v?"on":""}" onclick="st.q='';st.lim=0;go('${k}')">${t}</a>`).join("")+`<div class=who>👤 ${esc(ME.username)}<br><small>${RN[ME.role]||""}</small></div><a onclick="pwM()">🔑 Şifremi Değiştir</a><a onclick="logout()">🚪 Çıkış</a><div id=sv style="font-size:11px;margin-top:14px;opacity:.85">${window.svt||""}</div></div>`}
+$("main").innerHTML=LV[v]?listV(v):R[v]();if(LV[v])fill(v);if(v=="kul")loadUsers()}
+function listV(v){return`<h2>${LV[v][1]} <span class=n id=cnt></span></h2><div class=bar><input id=q type=search placeholder="Ara: çip, küpe, ad, kafes…" oninput="st.q=this.value;st.lim=0;fill('${v}')" value="${esc(st.q)}">${CAN.edit?`<button onclick="edit()">+ Yeni Köpek</button>`:""}<button class=g onclick="print()">Yazdır</button></div><div id=tb></div>`}
+function fill(v){const q=st.q.toLowerCase(),s=LV[v][0];const r=idx().filter(d=>(s=="Öldü"?d.deathDate:(!s||(d.status==s&&!d.deathDate)))&&(!q||["chip","chip2","tag","protocol","name","cage"].some(k=>String(d[k]||"").toLowerCase().includes(q))));const L=st.lim||200;$("#tb").innerHTML=tbl(r.slice(0,L),LV[v][2])+(r.length>L?`<p><button onclick="st.lim=${L}+300;fill('${v}')">Daha fazla göster (${r.length-L} kayıt daha)</button> <small>veya arama kutusunu kullanın</small></p>`:"");$("#cnt").textContent="("+r.length+")"}
+const R={
+ozet(){const t=today(),DM=chipMap(),p=D.vac.filter(v=>v.st=="Bekliyor"&&isAct(DM[v.chip])),lb=localStorage.getItem("ub_last");
+const old=CAN.admin&&(!lb||(Date.now()-lb)/864e5>30);
+return`<h2>Genel Durum</h2>${old?`<div class=warn>⚠ Son 30 günde bilgisayara yedek indirilmedi. <b>Yedekleme</b> sekmesinden yedek alın.</div>`:""}<div class=cards>${(()=>{const A=d=>!d.deathDate,cols=[...S.map((t,k)=>[t,["kafes","tedavi","sahip","sevk"][k],D.dogs.filter(d=>d.status==t&&A(d))]),["Öldü","olen",D.dogs.filter(d=>d.deathDate)],["Toplam Kayıt","dogs",D.dogs]],M=[["Dişi",d=>d.sex=="Dişi"],["Erkek",d=>d.sex=="Erkek"],["Küçük",d=>d.size=="Küçük"],["Orta",d=>d.size=="Orta"],["Büyük",d=>d.size=="Büyük"]];return cols.map(([t,g,a])=>`<div class=col><div class=card onclick="go('${g}')">${t}<b>${a.length}</b></div>${M.map(([l,f])=>`<div class=mini>${l}<b>${a.filter(f).length}</b></div>`).join("")}</div>`).join("")})()}</div>
+<h2>Aşı Randevuları</h2><p style="margin-top:-6px;color:#666;font-size:12px">Ölen, sahiplendirilen ve sevk edilen köpekler hariç</p><div class=cards><div class=card onclick="st.aktif=1;st.from=st.to=today();go('rand')">Bugün<b>${p.filter(v=>v.date==t).length}</b></div><div class=card onclick="st.aktif=1;st.from=t;st.to=addDays(7);go('rand')">Önümüzdeki 7 gün<b>${p.filter(v=>v.date>=t&&v.date<=addDays(7)).length}</b></div><div class=card style="border-color:#c00000" onclick="st.aktif=1;st.from='2000-01-01';st.to=addDays(-1);go('rand')">Gecikmiş<b class=n>${p.filter(v=>v.date<t).length}</b></div></div>`},
+kafes(){const g={};D.dogs.forEach((d,i)=>{if(d.status==S[0]&&!d.deathDate)(g[d.cage||"-"]=g[d.cage||"-"]||[]).push({...d,_i:i})});const ks=Object.keys(g).sort((a,b)=>a.localeCompare(b,"tr",{numeric:true}));if(!g[st.cage])st.cage=ks[0]||"";
+return`<h2>Kafesler</h2><div class=bar>${CAN.edit?`<button onclick="edit()">+ Yeni Köpek</button>`:""}<button class=g onclick="print()">Yazdır</button></div><p>${ks.map(k=>`<span class=chip style="${k==st.cage?"background:#1f5c3a;color:#fff":""}" onclick="st.cage=this.dataset.k;go('kafes')" data-k="${esc(k)}">Kafes ${esc(k)}: ${g[k].length}</span>`).join("")||"Yaşam alanında köpek yok."}</p>${ks.length?`<h3>Kafes ${esc(st.cage)} – ${g[st.cage].length} köpek</h3>`+tbl(g[st.cage],["chip","chip2","tag","haybis","name","breed","sex","age","color","size","neut","next"]):""}`},
+rand(){const t=today(),DM=chipMap(),r=D.vac.map((v,i)=>({...v,i})).filter(v=>v.date>=st.from&&v.date<=st.to).sort((a,b)=>a.date.localeCompare(b.date)),B=r.filter(v=>v.st!="Yapıldı"&&(!st.aktif||isAct(DM[v.chip]))),Y=r.filter(v=>v.st=="Yapıldı");
+const row=v=>{const d=DM[v.chip]||{};return`<tr class="${v.st=="Bekliyor"&&v.date<t?"late":""}"><td data-l="Tarih">${fd(v.date)}</td><td data-l="Çip No">${esc(v.chip)}</td><td data-l="Köpek">${esc(d.name)}</td><td data-l="Kafes">${esc(d.cage)}</td><td data-l="Aşı">${esc(v.type)}</td>${v.st!="Yapıldı"?`<td data-l="Durum">${v.st}</td>`:""}<td data-l="Köpeğin Durumu">${esc(d.deathDate?"Öldü":d.status)}</td><td>${CAN.edit?(v.st=="Bekliyor"?`<button onclick="done(${v.i})">Yapıldı</button> `:"")+`<button class=g onclick="vacM(${v.i})">Düzenle</button>`:""}</td></tr>`};
+const tb=(a,p)=>`<table class=rs><tr class=hr><th>Tarih</th><th>Çip No</th><th>Köpek</th><th>Kafes</th><th>Aşı</th>${p?"<th>Durum</th>":""}<th>Köpeğin Durumu</th><th></th></tr>${a.map(row).join("")||"<tr><td colspan=8>Kayıt yok</td></tr>"}</table>`;
+return`<h2>Aşı Randevuları</h2><div class=bar>Başlangıç: <input type=date value="${st.from}" onchange="st.from=this.value;go('rand',1)"> Bitiş: <input type=date value="${st.to}" onchange="st.to=this.value;go('rand',1)"><button class=g onclick="st.from=st.to=today();go('rand',1)">Bugün</button><button class=g onclick="st.from=today();st.to=addDays(7);go('rand',1)">7 Gün</button>${CAN.edit?`<button onclick="vacM()">+ Aşı / Randevu</button>`:""}<button class=g onclick="print()">Yazdır</button></div>
+<div class=bar><label style="font-size:13px;color:#222;display:flex;gap:6px;align-items:center"><input type=checkbox ${st.aktif?"checked":""} onchange="st.aktif=this.checked?1:0;go('rand',1)" style="width:auto;margin:0"> Bekleyenlerde yalnızca aktif köpekleri göster</label></div>
+<div class=tabs><span class="tab ${st.rt!="Y"?"on":""}" onclick="st.rt='B';go('rand',1)">⏳ Bekleyenler (${B.length})</span><span class="tab ${st.rt=="Y"?"on":""}" onclick="st.rt='Y';go('rand',1)">✔ Yapılanlar (${Y.length})</span></div>${st.rt=="Y"?tb(Y,0):tb(B,1)}`},
+yedek(){return`<h2>Yedekleme ve Aktarım</h2><div class=warn>Kayıtlar Firebase bulutunda saklanır; tüm kullanıcılar aynı verileri görür. Yine de ayda bir <b>Yedek İndir</b> ile bilgisayarınıza yedek alın.</div>
+<div class=bar><button onclick="bk()">Yedek İndir (.json)</button><button class=g onclick="csv('dogs')">Köpekleri Excel'e Aktar (.csv)</button><button class=g onclick="csv('vac')">Aşıları Excel'e Aktar (.csv)</button></div>
+<h3>Eski programdan aktarım</h3><p>Eski programın veri klasörünü seçin (içinde veri.json ve foto klasörü olan klasör). Fotoğraflar ve logo da aktarılır. Buluttaki kayıtlar silinmez, aynı çip numaralı köpekler atlanır. <b>Yalnızca bilgisayarda Chrome veya Edge ile çalışır.</b></p><div class=bar><button onclick="eskiAktar()">📁 Eski Veri Klasörünü Seç</button></div>
+<div class=bar><label style="margin:0">Aktarım dosyası ekle (.json, mevcut kayıtlar silinmez): <input type=file accept=".json" onchange="mg(this.files[0])"></label></div>
+<div class=bar><label style="margin:0">Rapor logosu (Nilüfer Belediyesi logosu, PNG/JPG): <input type=file accept="image/*" onchange="logoPut(this.files[0])"></label></div>
+<div class=warn style="background:#fde2e2;border-color:#c00000"><b>Yedekten geri yükle:</b> Buluttaki TÜM kayıtlar silinir ve yedek dosyasındakilerle değiştirilir.<br><input type=file accept=".json" onchange="rs(this.files[0])" style="margin-top:6px"></div>`},
+kul(){return`<h2>Kullanıcılar</h2><div class=warn><b>Yönetici:</b> her şeyi yapar, silme ve kullanıcı yönetimi dahil.<br><b>Kayıt Sorumlusu:</b> köpek ve aşı ekler, düzenler; kayıt silemez.<br><b>Görüntüleyici:</b> yalnızca görür ve rapor alır.</div>
+<h3>Yeni kullanıcı</h3><form class=bar onsubmit="event.preventDefault();yeniKul()"><input id=nu placeholder="Kullanıcı adı" autocapitalize=none autocomplete=off><input id=np type=password placeholder="Şifre (en az 6 karakter)" autocomplete=new-password><select id=nr>${roleOpts("editor")}</select><button>Kullanıcı Ekle</button></form>
+<h3>Mevcut kullanıcılar</h3><div id=ul>Yükleniyor…</div>
+<p style="font-size:12px;color:#555">Şifresini unutan kullanıcı için: Firebase konsolunda <b>Authentication → Users</b> bölümünden o kullanıcıyı silin, burada da <b>Sil</b>'e basın, sonra aynı kullanıcı adıyla yeniden oluşturun. Kullanıcılar kendi şifrelerini menüdeki <b>Şifremi Değiştir</b> ile değiştirebilir.</p>`}};
+const roleOpts=s=>Object.entries(RN).map(([k,t])=>`<option value=${k} ${k==s?"selected":""}>${t}</option>`).join("");
+function modal(h,ok,full){$("#ov").innerHTML=`<div class="box${full?" full":""}"><button class=x onclick="cx()" title="Kapat">✕</button>${h}<div class=bar style="margin-top:14px">${ok?`<button onclick="okf()">Kaydet</button>`:""}<button class=g onclick="cx()">${ok?"İptal":"Kapat"}</button>${window.xb||""}</div></div>`;$("#ov").style.display="flex";window.okf=ok}
+let RET=null;const ovOpen=()=>$("#ov").style.display=="flex";
+const cl=()=>{$("#ov").style.display="none";window.xb="";if(PEND)setTimeout(maybeApply,0)},back=()=>{if(RET!=null){const r=RET;RET=null;edit(r)}},cx=()=>{cl();back()},vals=()=>Object.fromEntries([...$("#ov").querySelectorAll("[name]")].map(e=>[e.name,e.value.trim()]));
+function ph(el){const h=$("#ov [name=photo]"),im=$("#pv");if(!el){h.value="-";im.removeAttribute("src");return}const f=el.files[0];if(!f)return;small(f,700,"image/jpeg").then(u=>{h.value=u;im.src=u})}
+const small=(f,m,t)=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>{const g=new Image();g.onload=()=>{const k=Math.min(1,m/Math.max(g.width,g.height)),c=document.createElement("canvas");c.width=Math.round(g.width*k);c.height=Math.round(g.height*k);c.getContext("2d").drawImage(g,0,0,c.width,c.height);res(c.toDataURL(t,.8))};g.onerror=rej;g.src=r.result};r.onerror=rej;r.readAsDataURL(f)});
+async function rapor(i){if(CAN.edit&&!sv(i,1))return;const d=D.dogs[i],V=vacOf(d).sort((a,b)=>a.date.localeCompare(b.date)),w=window.open("","_blank");if(!w)return alert("Rapor penceresi engellendi. Açılır pencerelere izin verin.");
+w.document.write("<p style='font-family:Arial'>Rapor hazırlanıyor…</p>");
+const [pf,lg]=await Promise.all([pgetf(d.pid),logoGet()]),g=k=>esc(val(d,k)),c=(l,k,n)=>`<th>${l}</th><td${n?` colspan=${n}`:""}>${g(k)}</td>`,r=(a,b)=>`<tr>${c(...a)}${b?c(...b):""}</tr>`;
+const Y=V.filter(v=>v.st=="Yapıldı"),B=V.filter(v=>v.st!="Yapıldı"),vt=(a,h)=>`<table class=v><tr><th style="width:26%">Tarih</th><th>Aşı</th>${h?"<th style=width:22%>Durum</th>":""}</tr>`+Array.from({length:Math.max(7,a.length)},(_,k)=>{const v=a[k];return v?`<tr><td>${fd(v.date)}</td><td>${esc(v.type)}</td>${h?`<td>${v.st}</td>`:""}</tr>`:`<tr><td></td><td></td>${h?"<td></td>":""}</tr>`}).join("")+"</table>";
+w.document.open();w.document.write(`<!DOCTYPE html><html lang=tr><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Köpek Raporu – ${g("chip")}</title><style>
+@page{size:A4;margin:10mm}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{font:9.5pt Arial,sans-serif;color:#111;margin:0 auto;max-width:190mm}
+.np{padding:8px;text-align:right}.np button{font-size:16px;padding:8px 14px}.hd{display:grid;grid-template-columns:30mm 1fr 42mm;gap:5mm;align-items:center;border-bottom:.8mm solid #1f5c3a;padding-bottom:3mm;margin-bottom:3mm}
+.lg{width:30mm;height:30mm;object-fit:contain}.lgp{width:30mm;height:30mm;border:1px dashed #aaa;font-size:8pt;color:#888;text-align:center;display:flex;align-items:center;justify-content:center}
+.t{text-align:center;line-height:1.4}.t b{font-size:14pt;color:#1f5c3a}.m{font-size:10pt;font-weight:700}.r{display:inline-block;margin-top:2mm;padding:1.2mm 5mm;background:#1f5c3a;color:#fff;font-weight:700;font-size:11pt}
+.ft{width:42mm;height:52mm;border:.4mm solid #444;display:flex;align-items:center;justify-content:center;color:#999;font-size:8pt}
+h3{margin:3mm 0 0;background:#1f5c3a;color:#fff;font-size:9.5pt;padding:1mm 2mm}table{width:100%;border-collapse:collapse;table-layout:fixed}
+th,td{border:.3mm solid #777;padding:1mm 2mm;height:6.2mm;vertical-align:middle;overflow:hidden}th{background:#e8f3ec;text-align:left;width:19%;font-size:9pt}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:4mm}.nt td{height:15mm;vertical-align:top}.sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10mm;margin-top:8mm;text-align:center;font-size:9pt}.sg div{border-top:.3mm solid #333;padding-top:1mm}
+.fo{margin-top:3mm;font-size:8pt;color:#666;text-align:right}@media print{.np{display:none}.lgp{visibility:hidden}}</style>
+<div class=np><button onclick=print()>🖨 Yazdır / PDF Kaydet</button></div>
+<div class=hd>${lg?`<img class=lg src="${lg}">`:`<div class=lgp>Logo<br>(Yedekleme sekmesinden yükleyin)</div>`}<div class=t>T.C.<br><b>NİLÜFER BELEDİYESİ</b><br><span class=m>Veteriner İşleri Müdürlüğü</span><br><span class=m>UMUT AĞACI DOĞAL YAŞAM VE SAHİPLENDİRME MERKEZİ</span><br><span class=r>KÖPEK KAYIT VE AŞI RAPORU</span></div><div class=ft style="${pf?`background:url(${pf}) center/cover no-repeat`:""}">${pf?"":"FOTOĞRAF"}</div></div>
+<h3>KİMLİK BİLGİLERİ</h3><table>${r(["Çip No","chip"],["2. Çip No","chip2"])}${r(["Küpe No","tag"],["Protokol No","protocol"])}${r(["Köpek Adı","name"],["Grup","group"])}${r(["Cins","type"],["Irk","breed"])}${r(["Cinsiyet","sex"],["Yaş (yıl)","age"])}${r(["Renk","color"],["Boyut","size"])}${r(["HAYBİS","haybis"],["Kafes No","cage"])}</table>
+<h3>KAYIT VE DURUM BİLGİLERİ</h3><table>${r(["Giriş Tarihi","entry"],["Durum","status"])}${r(["Durum Tarihi","sdate"],["Sebep","reason"])}${r(["Kısırlaştırıldı mı","neut"],["Kısırlaştırma Tarihi","neutDate"])}<tr>${c("Sevk Edilen Yer","place",3)}</tr></table>
+<h3>SAHİPLENDİRME BİLGİLERİ</h3><table>${r(["Ad Soyad","adopter"],["Telefon","phone"])}<tr>${c("Adres","addr",3)}</tr></table>
+<h3>ÖLÜM BİLGİSİ</h3><table>${r(["Ölüm Tarihi","deathDate"],["Ölüm Sebebi","deathReason"])}</table>
+<h3>AŞI KAYITLARI</h3><div class=two><div><b>✔ Yapılan Aşılar</b>${vt(Y,0)}</div><div><b>⏳ Randevular</b>${vt(B,1)}</div></div>
+<h3>NOT / AÇIKLAMA</h3><table class=nt><tr><td>${g("note")}</td></tr></table>
+<div class=sg><div>Hazırlayan Veteriner Hekim<br>(İmza)</div><div>Merkez Sorumlusu<br>(İmza)</div><div>Onay<br>(İmza / Mühür)</div></div><div class=fo>Rapor tarihi: ${fd(today())}</div>`);w.document.close()}
+function sv(i,q){if(!CAN.edit)return 0;const n=i==null,d=n?{}:D.dogs[i],v=Object.assign({},d,vals());
+if(!v.chip)return alert("1. Çip No zorunludur. Çip numarası girmeden kayıt yapılamaz."),0;
+if(v.chip2&&v.chip2==v.chip)return alert("1. ve 2. çip numarası aynı olamaz."),0;
+if(D.dogs.some((x,j)=>j!=i&&[x.chip,x.chip2].some(c=>c&&(c==v.chip||c==v.chip2))))return alert("Bu çip numarası başka bir köpekte kayıtlı!"),0;
+v.type="Köpek";const pv=v.photo;delete v.photo;if(pv=="-"){if(v.pid)pdel(v.pid);delete v.pid}else if(pv){v.pid=v.pid||newPid();pput(v.pid,pv).catch(e=>alert("Fotoğraf kaydedilemedi: "+e.message))}if(v.status&&v.status!=S[0]&&!v.sdate)v.sdate=today();
+if(!n&&d.chip!=v.chip)D.vac.forEach(x=>{if(x.chip==d.chip)x.chip=v.chip});
+if(!n&&d.chip2&&d.chip2!=v.chip2)D.vac.forEach(x=>{if(x.chip==d.chip2)x.chip=v.chip2||v.chip});
+n?D.dogs.push(v):D.dogs[i]=v;save();go(cur,1);if(!q)cl();return 1}
+function vd(i,vi,mk){if(!sv(i,1))return;RET=i;const d=D.dogs[i];if(vi==null)vacM(null,{chip:d.chip,date:today(),st:"Bekliyor"});else if(mk)done(vi);else vacM(vi)}
+function edit(i){const n=i==null,d=n?{status:S[0],entry:today()}:D.dogs[i];if(n&&!CAN.edit)return;window.xb=n?"":`<button class=g onclick="rapor(${i})">📄 Rapor Al</button>${CAN.del?`<button class=r onclick="del(${i})">Sil</button>`:""}`;
+const fld=([k,l,o,t])=>`<label>${l}${k=="chip"?' <b style="color:#c00000">* zorunlu</b>':""}`+(k=="breed"?`<input name=breed list=bl value="${esc(d.breed||"")}" placeholder="Seçin veya yazın">`:k=="haybis"?`<select name=haybis class="${hcl(d.haybis)}" onchange="this.className=hcl(this.value)"><option></option>${o.map(x=>`<option ${d.haybis==x?"selected":""}>${x}</option>`).join("")}</select>`:k=="type"?`<input name=type value="Köpek" readonly style="background:#eee">`:o?`<select name=${k}>${"<option></option>"+o.map(x=>`<option ${d[k]==x?"selected":""}>${x}</option>`).join("")}</select>`:`<input name=${k} type="${t||"text"}" value="${esc(d[k]||"")}"${["chip","chip2","phone"].includes(k)?" inputmode=numeric":""}>`)+"</label>";
+const V=n?[]:vacOf(d),Ld=V.filter(v=>v.st=="Yapıldı").sort((a,b)=>b.date.localeCompare(a.date)),Rd=V.filter(v=>v.st!="Yapıldı").sort((a,b)=>a.date.localeCompare(b.date));
+const vr=(v,dn)=>`<div class=vr>${fd(v.date)} – ${esc(v.type)}${v.st=="İptal"?" (İptal)":""}${CAN.edit?(!dn&&v.st=="Bekliyor"?`<button onclick="vd(${i},${v.i},1)">Yapıldı</button>`:"")+`<button class=g onclick="vd(${i},${v.i})">Düzenle</button>`:""}</div>`;
+const asi=n?`<p class=warn>Aşı eklemek için önce köpeği kaydedin, sonra kartı yeniden açın.</p>`:`<h3>💉 Aşılar</h3><div class=cols><div><b>✔ Yapılanlar</b>${Ld.map(v=>vr(v,1)).join("")||"<div>–</div>"}</div><div><b>⏳ Randevular</b>${Rd.map(v=>vr(v)).join("")||"<div>–</div>"}</div></div>${CAN.edit?`<button onclick="vd(${i},null)">+ Yeni Aşı / Randevu</button>`:""}`;
+modal(`<h3>${n?"Yeni Köpek Kaydı":"Köpek Kartı: "+esc(d.name||d.chip)}</h3><div class=ph><img id=pv alt="Fotoğraf yok">${CAN.edit?`<div><b>📷 Fotoğraf</b><br><input type=file accept="image/*" onchange="ph(this)"><br><button class=g type=button onclick="ph()">Fotoğrafı Kaldır</button></div>`:""}<input type=hidden name=photo value=""></div><div class=grid>${F.map(fld).join("")}</div>${asi}<datalist id=bl>${BR.map(b=>`<option>${b}</option>`).join("")}</datalist>`,CAN.edit?()=>sv(i):null,1);
+if(!CAN.edit)$("#ov").querySelectorAll(".grid input,.grid select").forEach(e=>e.disabled=true);
+pgetf(d.pid).then(u=>{if(u&&$("#pv"))$("#pv").src=u})}
+function ask(m,y,n){$("#ov").innerHTML=`<div class=box style="max-width:480px;height:auto"><h3 style="color:#c00000">⚠ Silme Onayı</h3><p>${m}</p><p><b>Emin misiniz?</b></p><div class=bar><button class=r onclick="yf()">Evet, Sil</button><button class=g onclick="nf()">Vazgeç</button></div></div>`;$("#ov").style.display="flex";window.yf=y;window.nf=n}
+function del(i){if(!CAN.del)return;const d=D.dogs[i],nv=vacOf(d).length;ask(`<b>${esc(d.name||"")} (${esc(d.chip)})</b> köpek kaydı${nv?` ve bu köpeğe ait <b>${nv} aşı / randevu kaydı</b>`:""} <b>kalıcı olarak silinecek</b> ve geri alınamaz.`,()=>{if(d.pid)pdel(d.pid);D.vac=D.vac.filter(v=>v.chip!=d.chip&&!(d.chip2&&v.chip==d.chip2));D.dogs.splice(i,1);save();cl();go(cur,1)},()=>edit(i))}
+function vdel(i){if(!CAN.del)return;ask("Bu aşı / randevu kaydı <b>kalıcı olarak silinecek</b>.",()=>{D.vac.splice(i,1);save();cl();go(cur,1);back()},()=>vacM(i))}
+function vacM(i,pre){if(!CAN.edit)return;const n=i==null,v=n?(pre||{date:today(),st:"Bekliyor"}):D.vac[i];window.xb=n||!CAN.del?"":`<button class=r onclick="vdel(${i})">Sil</button>`;
+modal(`<h3>${n?"Yeni Aşı / Randevu":"Aşı Kaydı"}</h3><div class=grid><label>Çip No<input name=chip list=cl value="${esc(v.chip||"")}" inputmode=numeric></label><label>Aşı Türü<input name=type list=al value="${esc(v.type||"")}"></label><label>Tarih (randevu / yapılan)<input name=date type=date value="${v.date||""}"></label><label>Durum<select name=st>${["Bekliyor","Yapıldı","İptal"].map(x=>`<option ${v.st==x?"selected":""}>${x}</option>`).join("")}</select></label></div>
+<datalist id=cl>${D.dogs.flatMap(d=>[d.chip,d.chip2].filter(Boolean).map(c=>`<option value="${esc(c)}">${esc(d.name)} – Kafes ${esc(d.cage)}</option>`)).join("")}</datalist><datalist id=al>${AŞI.map(a=>`<option>${a}</option>`).join("")}</datalist>`,()=>{const x=vals();
+if(!x.chip||!x.date||!x.type)return alert("Çip No, aşı türü ve tarih zorunludur.");if(!dogOf(x.chip)&&!confirm("Bu çip numarası köpek kayıtlarında yok. Yine de eklensin mi?"))return;
+if(n)D.vac.push(x);else D.vac[i]=Object.assign({_id:D.vac[i]._id},x);save();cl();go(cur,1);back()})}
+function done(i){if(!CAN.edit)return;D.vac[i].st="Yapıldı";save();const v=D.vac[i];go(cur,1);if(confirm("Aşı yapıldı olarak işaretlendi.\nBu köpek için sonraki randevu verilsin mi?"))vacM(null,{chip:v.chip,type:v.type,date:"",st:"Bekliyor"});else back()}
+function dl(n,t,m){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;document.body.appendChild(a);a.click();a.remove()}
+function bk(){dl("UmutAgaci_Yedek_"+today()+".json",JSON.stringify(D),"application/json");localStorage.setItem("ub_last",Date.now());go("yedek",1)}
+function rs(f){if(!f||!CAN.admin)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.dogs)throw 0;if(confirm("Buluttaki TÜM kayıtlar silinip yedektekilerle değiştirilecek. Devam?")){D={dogs:x.dogs,vac:x.vac||[]};norm();save();alert("Yedek yüklendi.");go("ozet")}}catch(e){alert("Geçersiz yedek dosyası.")}};r.readAsText(f)}
+async function mergeData(x,fdir){let a=0,k=0,v=0,p=0;const add=[];(x.dogs||[]).forEach(d=>{if(!d.chip)return;if(dogOf(d.chip)||(d.chip2&&dogOf(d.chip2)))k++;else{delete d._id;D.dogs.push(d);add.push(d);a++}});(x.vac||[]).forEach(w=>{if(!D.vac.some(y=>y.chip==w.chip&&y.type==w.type&&y.date==w.date)){delete w._id;D.vac.push(w);v++}});norm();save();
+if(fdir){const ps=add.filter(d=>d.pid);for(const d of ps){try{const f=await(await fdir.getFileHandle(d.pid+".jpg")).getFile();await pput(d.pid,await small(f,700,"image/jpeg"));p++;window.svt=`📷 Fotoğraf aktarılıyor ${p}/${ps.length}`;upd()}catch(e){}}window.svt="✔ Aktarım tamamlandı";upd()}
+return[a,k,v,p]}
+function mg(f){if(!f||!CAN.admin)return;const r=new FileReader();r.onload=async()=>{try{const x=JSON.parse(r.result);const[a,k,v]=await mergeData(x);alert(a+" köpek eklendi, "+k+" köpek zaten kayıtlı olduğu için atlandı, "+v+" aşı kaydı eklendi.");go("ozet")}catch(e){alert("Geçersiz aktarım dosyası.")}};r.readAsText(f)}
+async function eskiAktar(){if(!CAN.admin)return;if(!window.showDirectoryPicker)return alert("Bu özellik yalnızca bilgisayarda Chrome veya Edge tarayıcısında çalışır.");let h;try{h=await showDirectoryPicker({mode:"read"})}catch(e){return}
+try{let X;try{X=JSON.parse(await(await(await h.getFileHandle("veri.json")).getFile()).text())}catch(e){throw new Error("Seçilen klasörde veri.json bulunamadı.")}if(!X.dogs)throw new Error("veri.json geçersiz.");
+let fdir=null;try{fdir=await h.getDirectoryHandle("foto")}catch(e){}
+try{await logoPut(await(await h.getFileHandle("logo.png")).getFile(),1)}catch(e){}
+window.svt="⏳ Aktarılıyor…";upd();const[a,k,v,p]=await mergeData(X,fdir);alert(`${a} köpek eklendi, ${k} köpek zaten kayıtlı olduğu için atlandı, ${v} aşı kaydı ve ${p} fotoğraf eklendi.`);go("ozet")}catch(e){alert("Aktarım yapılamadı: "+e.message)}}
+function csv(w){const cols=w=="dogs"?F.map(f=>[f[0],f[1]]):[["chip","Çip No"],["type","Aşı Türü"],["date","Tarih"],["st","Durum"]],rows=D[w=="dogs"?"dogs":"vac"],TX=["chip","chip2","tag","protocol","phone"];
+const q=s=>'"'+String(s??"").replace(/"/g,'""')+'"',cv=(r,k)=>TX.includes(k)&&r[k]?'="'+r[k]+'"':r[k];
+dl(w+"_"+today()+".csv","﻿"+[cols.map(c=>q(c[1])).join(";"),...rows.map(r=>cols.map(c=>q(cv(r,c[0]))).join(";"))].join("\r\n"),"text/csv")}
+
+/* ================== BULUT (Firebase) ================== */
+const NB=16,hsh=s=>{let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h%NB};
+let SEQ=0;const nid=()=>(Date.now()*1000+(SEQ++%1000)).toString(36).padStart(11,"0")+Math.random().toString(36).slice(2,6);
+const sj=o=>JSON.stringify(Object.keys(o).filter(k=>o[k]!==undefined).sort().map(k=>[k,o[k]]));
+let RAW={dogs:null,vac:null},SYNC={dogs:{},vac:{}},LOADED=0,PEND=0,UNS=[],PH={},LOGO=null;
+async function wr(){tmr=0;if(!CAN.edit||!RAW.dogs||!RAW.vac)return;const by={};let n=0;
+const add=(k,id,v)=>{const b="b"+hsh(id),key=k+"/"+b;(by[key]=by[key]||{k,b,r:{},f:[]});by[key].r[id]=v===null?FB.deleteField():v;by[key].f.push(new FB.FieldPath("r",id));n++};
+for(const k of["dogs","vac"]){const seen=new Set();for(const r of D[k]){if(!r._id)r._id=nid();const{_id,...rest}=r;const j=sj(rest);seen.add(_id);if(SYNC[k][_id]!==j){SYNC[k][_id]=j;RAW[k][_id]=rest;add(k,_id,rest)}}
+for(const id of Object.keys(SYNC[k]))if(!seen.has(id)){delete SYNC[k][id];delete RAW[k][id];add(k,id,null)}}
+if(!n){window.svt="✔ Kaydedildi";upd();maybeApply();return}
+const G=Object.values(by);
+try{for(let i=0;i<G.length;i+=400){const bt=FB.writeBatch(FB.db);G.slice(i,i+400).forEach(g=>bt.set(FB.doc(FB.db,g.k,g.b),{r:g.r},{mergeFields:g.f}));await bt.commit()}
+window.svt="✔ Kaydedildi "+new Date().toLocaleTimeString("tr")}catch(e){window.svt="⚠ KAYDEDİLEMEDİ";alert("Buluta kaydedilemedi: "+aerr(e))}upd();maybeApply()}
+function maybeApply(){if(!RAW.dogs||!RAW.vac)return;if(tmr||ovOpen()){PEND=1;return}PEND=0;
+const rid=RET!=null&&D.dogs[RET]?D.dogs[RET]._id:null;
+for(const k of["dogs","vac"]){const ids=Object.keys(RAW[k]).sort();D[k]=ids.map(id=>({...RAW[k][id],_id:id}));SYNC[k]=Object.fromEntries(ids.map(id=>[id,sj(RAW[k][id])]))}
+if(rid){RET=D.dogs.findIndex(d=>d._id==rid);if(RET<0)RET=null}
+if(!LOADED){LOADED=1;wdOff();document.body.classList.remove("lg");go("ozet")}else if(LV[cur]&&$("#tb"))fill(cur);else if(cur!="kul"&&cur!="yedek")go(cur,1)}
+function stopAll(){UNS.forEach(f=>{try{f()}catch(e){}});UNS=[];clearTimeout(tmr);tmr=0;D={dogs:[],vac:[]};RAW={dogs:null,vac:null};SYNC={dogs:{},vac:{}};LOADED=0;PEND=0;PH={};LOGO=null;RET=null;$("#ov").style.display="none"}
+function listen(){$("main").innerHTML="<h2>Kayıtlar yükleniyor…</h2>";
+["dogs","vac"].forEach(k=>UNS.push(FB.onSnapshot(FB.collection(FB.db,k),s=>{const m={};s.forEach(d=>{const r=d.data().r||{};for(const id in r)m[id]=r[id]});RAW[k]=m;maybeApply()},e=>{wdOff();$("main").innerHTML=`<div class=warn>Kayıtlar okunamadı: ${esc(aerr(e))}</div>`})));
+UNS.push(FB.onSnapshot(FB.doc(FB.db,"users",ME.uid),s=>{const x=s.exists()?s.data():null;if(!x||!x.active){alert("Hesabınız pasif yapıldı veya silindi.");logout()}else if(x.role!=ME.role){ME.role=x.role;setRole(x.role);go(cur)}},()=>{}))}
+async function pgetf(p){if(!p)return"";if(PH[p])return PH[p];try{const s=await FB.getDoc(FB.doc(FB.db,"photos",p));return PH[p]=s.exists()?s.data().d:""}catch(e){return""}}
+async function pput(p,u){PH[p]=u;await FB.setDoc(FB.doc(FB.db,"photos",p),{d:u})}
+async function pdel(p){delete PH[p];try{await FB.deleteDoc(FB.doc(FB.db,"photos",p))}catch(e){}}
+async function logoGet(){if(LOGO!=null)return LOGO;try{const s=await FB.getDoc(FB.doc(FB.db,"config","logo"));return LOGO=s.exists()?s.data().d:""}catch(e){return""}}
+async function logoPut(f,silent){if(!f||!CAN.admin)return;try{const u=await small(f,500,"image/png");await FB.setDoc(FB.doc(FB.db,"config","logo"),{d:u});LOGO=u;if(!silent)alert("Logo kaydedildi. Rapor çıktılarında kullanılacak.")}catch(e){if(!silent)alert("Logo kaydedilemedi: "+aerr(e))}}
+
+/* ================== GİRİŞ / KULLANICILAR ================== */
+const un=s=>String(s||"").trim().toLocaleLowerCase("tr").replace(/[çğıöşü]/g,c=>({ç:"c",ğ:"g",ı:"i",ö:"o",ş:"s",ü:"u"}[c])).replace(/\s+/g,"");
+const okUser=u=>/^[a-z0-9._-]{3,30}$/.test(u);
+const mail=u=>u+"@"+USER_DOMAIN;
+const aerr=x=>({"auth/invalid-credential":"Kullanıcı adı veya şifre hatalı.","auth/wrong-password":"Kullanıcı adı veya şifre hatalı.","auth/user-not-found":"Kullanıcı adı veya şifre hatalı.","auth/invalid-login-credentials":"Kullanıcı adı veya şifre hatalı.","auth/invalid-email":"Geçersiz kullanıcı adı.","auth/too-many-requests":"Çok fazla hatalı deneme. Biraz bekleyip tekrar deneyin.","auth/network-request-failed":"İnternet bağlantısı yok.","auth/email-already-in-use":"Bu kullanıcı adı zaten kullanılıyor.","auth/weak-password":"Şifre en az 6 karakter olmalı.","auth/operation-not-allowed":"Firebase'de E-posta/Şifre girişi açılmamış (kurulum adımı 2).","auth/requires-recent-login":"Güvenlik için çıkış yapıp tekrar girin.","auth/unauthorized-domain":"Bu adres Firebase'de yetkili değil (Authentication → Settings → Authorized domains).","permission-denied":"Yetkiniz yok veya Firestore kuralları yüklenmemiş (kurulum adımı 4).","unavailable":"Sunucuya ulaşılamıyor, internet bağlantınızı kontrol edin."}[x&&x.code]||("Hata: "+((x&&(x.code||x.message))||x)));
+function loginV(first){wdOff();document.body.classList.add("lg");$("nav").innerHTML="";$("#ov").style.display="none";
+$("main").innerHTML=`<form class=login onsubmit="event.preventDefault();${first?"ilkKur()":"girisYap()"}"><h2>🐾 Umut Ağacı</h2><p style="margin-top:-6px;color:#555">Köpek Kayıt ve Aşı Takip Programı</p>${first?`<div class=warn><b>İlk kurulum:</b> Yönetici hesabını oluşturun. Diğer kullanıcıları sonra bu hesapla eklersiniz.</div>`:""}<label>Kullanıcı adı<input id=lu autocapitalize=none autocomplete=username autocorrect=off spellcheck=false></label><label>Şifre<input id=lp type=password autocomplete="${first?"new-password":"current-password"}"></label>${first?`<label>Şifre (tekrar)<input id=lp2 type=password autocomplete=new-password></label>`:""}<button>${first?"Yönetici Hesabını Oluştur":"Giriş Yap"}</button><p id=lerr class=n style="min-height:1em"></p></form>`;setTimeout(()=>{const e=$("#lu");if(e)e.focus()},50)}
+async function girisYap(){const u=un($("#lu").value),p=$("#lp").value,e=$("#lerr");if(!u||!p)return e.textContent="Kullanıcı adı ve şifre girin.";e.textContent="Giriş yapılıyor…";try{await FB.signIn(mail(u),p)}catch(x){e.textContent=aerr(x)}}
+async function ilkKur(){const u=un($("#lu").value),p=$("#lp").value,e=$("#lerr");
+if(!okUser(u))return e.textContent="Kullanıcı adı 3-30 karakter olmalı; harf, rakam, nokta, tire ve alt çizgi kullanılabilir.";
+if(p.length<6)return e.textContent="Şifre en az 6 karakter olmalı.";if(p!=$("#lp2").value)return e.textContent="Şifreler aynı değil.";
+e.textContent="Oluşturuluyor…";SETUP=1;try{let cr;try{cr=await FB.createFirst(mail(u),p)}catch(x){if(x.code=="auth/email-already-in-use")cr=await FB.signIn(mail(u),p);else throw x}
+const b=FB.writeBatch(FB.db);b.set(FB.doc(FB.db,"users",cr.user.uid),{username:u,role:"admin",active:true,created:today()});b.set(FB.doc(FB.db,"config","init"),{by:cr.user.uid,at:today()});await b.commit();SETUP=0;onAuth(cr.user)}
+catch(x){SETUP=0;e.textContent=aerr(x);try{await FB.signOut()}catch(_){}}}
+async function onAuth(u){if(SETUP)return;stopAll();ME=null;wd(u?"oturum kontrolü":"giriş ekranı");
+if(!u){let first=false;try{first=!(await FB.getDoc(FB.doc(FB.db,"config","init"))).exists()}catch(e){}return loginV(first)}
+document.body.classList.add("lg");$("nav").innerHTML="";$("main").innerHTML="<div class=login><h2>Giriş yapılıyor…</h2></div>";
+let s;try{s=await FB.getDoc(FB.doc(FB.db,"users",u.uid))}catch(e){wdOff();$("main").innerHTML=`<div class=login><div class=warn>${esc(aerr(e))}</div><button onclick="logout()">Çıkış</button></div>`;return}
+if(!s.exists()||!s.data().active){wdOff();$("main").innerHTML=`<div class=login><div class=warn>Bu hesap aktif değil veya yetkisi yok. Yöneticinize başvurun.</div><button onclick="logout()">Çıkış</button></div>`;return}
+ME={uid:u.uid,...s.data()};setRole(ME.role);document.body.classList.remove("lg");window.svt="";wd("kayıtlar yükleniyor");listen()}
+async function logout(){if(tmr){clearTimeout(tmr);try{await wr()}catch(e){}}try{await FB.signOut()}catch(e){}}
+function pwM(){window.xb="";modal(`<h3>🔑 Şifremi Değiştir</h3><div class=grid><label>Mevcut şifre<input name=o type=password autocomplete=current-password></label><label>Yeni şifre<input name=n1 type=password autocomplete=new-password></label><label>Yeni şifre (tekrar)<input name=n2 type=password autocomplete=new-password></label></div>`,async()=>{const x=vals();if(x.n1.length<6)return alert("Yeni şifre en az 6 karakter olmalı.");if(x.n1!=x.n2)return alert("Yeni şifreler aynı değil.");try{await FB.changePw(x.o,x.n1);cl();alert("Şifreniz değiştirildi.")}catch(e){alert(aerr(e))}})}
+async function loadUsers(){try{const s=await FB.getDocs(FB.collection(FB.db,"users"));const U=s.docs.map(d=>({uid:d.id,...d.data()})).sort((a,b)=>(a.username||"").localeCompare(b.username||"","tr"));if(!$("#ul"))return;
+$("#ul").innerHTML=`<table class=rs><tr class=hr><th>Kullanıcı adı</th><th>Yetki</th><th>Durum</th><th></th></tr>${U.map(u=>`<tr><td data-l="Kullanıcı adı">${esc(u.username)}${u.uid==ME.uid?" (siz)":""}</td><td data-l="Yetki"><select id="r_${u.uid}">${roleOpts(u.role)}</select></td><td data-l="Durum"><select id="a_${u.uid}"><option value=1 ${u.active?"selected":""}>Aktif</option><option value=0 ${!u.active?"selected":""}>Pasif</option></select></td><td><button onclick="kulKaydet('${u.uid}')">Kaydet</button> ${u.uid==ME.uid?"":`<button class=r onclick="kulSil('${u.uid}')">Sil</button>`}</td></tr>`).join("")}</table>`;window.UL=U}catch(e){if($("#ul"))$("#ul").textContent="Kullanıcılar yüklenemedi: "+aerr(e)}}
+async function kulKaydet(uid){const role=$("#r_"+uid).value,active=$("#a_"+uid).value=="1";if(uid==ME.uid&&(role!="admin"||!active))return alert("Kendi yönetici yetkinizi kaldıramazsınız. Önce başka bir yönetici oluşturun ve o hesapla değiştirin.");try{await FB.setDoc(FB.doc(FB.db,"users",uid),{role,active},{merge:true});alert("Kaydedildi.");loadUsers()}catch(e){alert(aerr(e))}}
+function kulSil(uid){const u=(window.UL||[]).find(x=>x.uid==uid)||{};ask(`<b>${esc(u.username)}</b> kullanıcısının programa erişimi kalıcı olarak kaldırılacak. (Hesabı tamamen silmek için Firebase konsolunda Authentication → Users bölümünden de silin.)`,async()=>{cl();try{await FB.deleteDoc(FB.doc(FB.db,"users",uid));loadUsers()}catch(e){alert(aerr(e))}},()=>cl())}
+async function yeniKul(){const u=un($("#nu").value),p=$("#np").value,r=$("#nr").value;
+if(!okUser(u))return alert("Kullanıcı adı 3-30 karakter olmalı; harf, rakam, nokta, tire ve alt çizgi kullanılabilir.");if(p.length<6)return alert("Şifre en az 6 karakter olmalı.");
+try{const uid=await FB.createUser(mail(u),p);await FB.setDoc(FB.doc(FB.db,"users",uid),{username:u,role:r,active:true,created:today()});alert(`"${u}" kullanıcısı ${RN[r]} yetkisiyle oluşturuldu.`);go("kul",1)}catch(e){alert(aerr(e))}}
+addEventListener("pagehide",()=>{if(tmr){clearTimeout(tmr);wr()}});
+
+/* ================== KURULUM EKRANI ================== */
+function showSetup(){STARTED=1;wdOff();document.body.classList.add("lg");$("main").innerHTML=`<div class=login style="max-width:760px"><h2>Kurulum gerekli</h2><p>Bu program kayıtları ücretsiz <b>Firebase</b> bulutunda saklar. Bir kerelik kurulum yaklaşık 10 dakika sürer:</p><ol>
+<li><b>console.firebase.google.com</b> adresine Google hesabınızla girin, <b>Proje oluştur</b> (Create project) deyin. Google Analytics'i kapatabilirsiniz. Ücretsiz <b>Spark</b> planında kalın, plan yükseltmeyin.</li>
+<li>Sol menüden <b>Authentication</b> → <b>Başlayın</b> → <b>Sign-in method</b> → <b>E-posta/Şifre</b> (Email/Password) seçeneğini etkinleştirin.</li>
+<li>Sol menüden <b>Firestore Database</b> → <b>Veritabanı oluştur</b>. Konum olarak Avrupa'yı (ör. europe-west / eur3) seçin, <b>üretim modu</b> (production mode) ile başlatın.</li>
+<li>Firestore'da <b>Kurallar</b> (Rules) sekmesine geçin, oradaki metni silip aşağıdaki kuralları yapıştırın ve <b>Yayınla</b> (Publish) deyin.</li>
+<li>⚙ <b>Proje ayarları</b> → <b>Genel</b> → <b>Uygulamalarınız</b> bölümünde web simgesine (<b>&lt;/&gt;</b>) basın, bir ad verip kaydedin. Gösterilen <b>firebaseConfig</b> içindeki değerleri bu HTML dosyasını Not Defteri ile açıp en üstteki <b>FIREBASE_CONFIG</b> bölümüne yapıştırın ve kaydedin.</li>
+<li>Dosyayı tarayıcıda yeniden açın ve ilk yönetici hesabını oluşturun.</li></ol>
+<h3>Firestore kuralları</h3><pre>${esc(RULES)}</pre><button onclick="navigator.clipboard.writeText(RULES).then(()=>alert('Kurallar kopyalandı.'),()=>alert('Kopyalanamadı; metni elle seçip kopyalayın.'))">Kuralları Kopyala</button></div>`}
+let WD=0;function wd(msg){clearTimeout(WD);WD=setTimeout(()=>{document.body.classList.add("lg");$("#ov").style.display="none";$("main").innerHTML=`<div class=login><div class=warn>Bağlantı beklenenden uzun sürüyor.<br><small>Aşama: ${esc(msg)}</small><br><br>İnternet bağlantınızı kontrol edip sayfayı yenileyin.</div><button onclick="location.reload()">Sayfayı Yenile</button><button class=g style="margin-top:8px" onclick="logout().then(()=>location.reload())">Çıkış Yap</button></div>`},20000)}
+const wdOff=()=>clearTimeout(WD);
+wd("Firebase yükleniyor");
+</script>
+
+<script>function fbFail(){if(window.__fbf)return;window.__fbf=1;clearTimeout(WD);document.body.classList.add("lg");$("main").innerHTML=`<div class=login><div class=warn>Firebase dosyaları internetten indirilemedi.<br><br>İnternet bağlantınızı kontrol edin. Dosyayı telefondan doğrudan açıyorsanız tarayıcı dış bağlantıları engelliyor olabilir; programı web adresinden (GitHub Pages) açmayı deneyin.</div><button onclick="location.reload()">Sayfayı Yenile</button></div>`}</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" onerror="fbFail()"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" onerror="fbFail()"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" onerror="fbFail()"></script>
+<script>
+(function(){
+const C=FIREBASE_CONFIG;
+if(!C.apiKey||!C.projectId)return showSetup();
+if(!window.firebase||!firebase.firestore||!firebase.auth)return fbFail();
+const app=firebase.initializeApp(C),auth=app.auth(),db=app.firestore();
+try{db.settings({ignoreUndefinedProperties:true,experimentalAutoDetectLongPolling:true,merge:true})}catch(e){}
+const W=s=>({id:s.id,exists:()=>s.exists,data:()=>s.data()});
+window.FB={app,auth,db,
+ doc:(d,...p)=>db.doc(p.join("/")),collection:(d,...p)=>db.collection(p.join("/")),
+ getDoc:async r=>W(await r.get()),setDoc:(r,d,o)=>o?r.set(d,o):r.set(d),deleteDoc:r=>r.delete(),
+ getDocs:c=>c.get(),
+ onSnapshot:(r,next,err)=>r.onSnapshot(s=>next(s.docs?s:W(s)),err),
+ writeBatch:()=>db.batch(),FieldPath:firebase.firestore.FieldPath,deleteField:()=>firebase.firestore.FieldValue.delete(),
+ signIn:(e,p)=>auth.signInWithEmailAndPassword(e,p),signOut:()=>auth.signOut(),createFirst:(e,p)=>auth.createUserWithEmailAndPassword(e,p),
+ async createUser(e,p){const a2=firebase.initializeApp(C,"ek"+Date.now());try{const cr=await a2.auth().createUserWithEmailAndPassword(e,p);await a2.auth().signOut();return cr.user.uid}finally{await a2.delete()}},
+ async changePw(o,n){const u=auth.currentUser;await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,o));await u.updatePassword(n)}};
+STARTED=1;auth.onAuthStateChanged(u=>onAuth(u));
+})();
+</script>
+</body></html>
