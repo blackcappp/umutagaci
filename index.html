@@ -168,7 +168,7 @@ olen:["Öldü","Ölen Köpekler",[...base,["deathDate","Ölüm Tarihi"],["deathR
 let cur="ozet",st={q:"",cage:"",from:today(),to:today(),aktif:1};
 const NAV=[["ozet","Özet"],["dogs","Köpek Kayıt"],["kafes","Kafesler"],["tedavi","Tedavi"],["sahip","Sahiplendirilenler"],["sevk","Sevk Edilenler"],["olen","Ölenler"],["rand","Randevular (Aşı)"],["yedek","Yedekleme",1],["kul","Kullanıcılar",1]];
 function go(v,keep){if(NAV.some(n=>n[0]==v&&n[2])&&!CAN.admin)v="ozet";cur=v;
-if(!keep){document.body.classList.remove("mo");$("nav").innerHTML=`<div class=top><h1>🐾 UMUT AĞACI<br><small>Doğal Yaşam ve Sahiplendirme Merkezi<br>Nilüfer Belediyesi</small></h1><button class=burger onclick="document.body.classList.toggle('mo')" aria-label="Menü">☰</button></div><div class=menu>`+NAV.filter(n=>!n[2]||CAN.admin).map(([k,t])=>`<a class="${k==v?"on":""}" onclick="st.q='';st.lim=0;go('${k}')">${t}</a>`).join("")+`<div class=who>👤 ${esc(ME.username)}<br><small>${RN[ME.role]||""}</small></div><a onclick="pwM()">🔑 Şifremi Değiştir</a><a onclick="logout()">🚪 Çıkış</a><div id=sv style="font-size:11px;margin-top:14px;opacity:.85">${window.svt||""}</div></div>`}
+if(!keep){document.body.classList.remove("mo");$("nav").innerHTML=`<div class=top><h1>🐾 UMUT AĞACI<br><small>Doğal Yaşam ve Sahiplendirme Merkezi<br>Nilüfer Belediyesi</small></h1><button class=burger onclick="document.body.classList.toggle('mo')" aria-label="Menü">☰</button></div><div class=menu>`+NAV.filter(n=>!n[2]||CAN.admin).map(([k,t])=>`<a class="${k==v?"on":""}" onclick="st.q='';st.lim=0;go('${k}')">${t}</a>`).join("")+`<div class=who>👤 ${esc(ME.username)}<br><small>${RN[ME.role]||""}</small></div><a onclick="FB.refresh&&FB.refresh();document.body.classList.remove('mo')">🔄 Verileri Yenile</a><a onclick="pwM()">🔑 Şifremi Değiştir</a><a onclick="logout()">🚪 Çıkış</a><div id=sv style="font-size:11px;margin-top:14px;opacity:.85">${window.svt||""}</div></div>`}
 $("main").innerHTML=LV[v]?listV(v):R[v]();if(LV[v])fill(v);if(v=="kul")loadUsers()}
 function listV(v){return`<h2>${LV[v][1]} <span class=n id=cnt></span></h2><div class=bar><input id=q type=search placeholder="Ara: çip, küpe, ad, kafes…" oninput="st.q=this.value;st.lim=0;fill('${v}')" value="${esc(st.q)}">${CAN.edit?`<button onclick="edit()">+ Yeni Köpek</button>`:""}<button class=g onclick="print()">Yazdır</button></div><div id=tb></div>`}
 function fill(v){const q=st.q.toLowerCase(),s=LV[v][0];const r=idx().filter(d=>(s=="Öldü"?d.deathDate:(!s||(d.status==s&&!d.deathDate)))&&(!q||["chip","chip2","tag","protocol","name","cage"].some(k=>String(d[k]||"").toLowerCase().includes(q))));const L=st.lim||200;$("#tb").innerHTML=tbl(r.slice(0,L),LV[v][2])+(r.length>L?`<p><button onclick="st.lim=${L}+300;fill('${v}')">Daha fazla göster (${r.length-L} kayıt daha)</button> <small>veya arama kutusunu kullanın</small></p>`:"");$("#cnt").textContent="("+r.length+")"}
@@ -343,21 +343,55 @@ wd("Firebase yükleniyor");
 <script>function fbFail(){if(window.__fbf)return;window.__fbf=1;clearTimeout(WD);document.body.classList.add("lg");$("main").innerHTML=`<div class=login><div class=warn>Firebase dosyaları internetten indirilemedi.<br><br>İnternet bağlantınızı kontrol edin. Dosyayı telefondan doğrudan açıyorsanız tarayıcı dış bağlantıları engelliyor olabilir; programı web adresinden (GitHub Pages) açmayı deneyin.</div><button onclick="location.reload()">Sayfayı Yenile</button></div>`}</script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" onerror="fbFail()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" onerror="fbFail()"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" onerror="fbFail()"></script>
 <script>
 (function(){
 const C=FIREBASE_CONFIG;
 if(!C.apiKey||!C.projectId)return showSetup();
-if(!window.firebase||!firebase.firestore||!firebase.auth)return fbFail();
-const app=firebase.initializeApp(C),auth=app.auth(),db=app.firestore();
-try{db.settings({ignoreUndefinedProperties:true,experimentalForceLongPolling:true,merge:true})}catch(e){try{db.settings({ignoreUndefinedProperties:true,experimentalForceLongPolling:true})}catch(_){}}
-const W=s=>({id:s.id,exists:()=>s.exists,data:()=>s.data()});
-window.FB={app,auth,db,
- doc:(d,...p)=>db.doc(p.join("/")),collection:(d,...p)=>db.collection(p.join("/")),
- getDoc:async r=>W(await r.get()),setDoc:(r,d,o)=>o?r.set(d,o):r.set(d),deleteDoc:r=>r.delete(),
- getDocs:c=>c.get(),
- onSnapshot:(r,next,err)=>r.onSnapshot(s=>next(s.docs?s:W(s)),err),
- writeBatch:()=>db.batch(),FieldPath:firebase.firestore.FieldPath,deleteField:()=>firebase.firestore.FieldValue.delete(),
+if(!window.firebase||!firebase.auth)return fbFail();
+const app=firebase.initializeApp(C),auth=app.auth();
+/* ---- Firestore REST katmanı (sıradan HTTPS istekleri) ---- */
+const ROOT="projects/"+C.projectId+"/databases/(default)/documents";
+const BASE="https://firestore.googleapis.com/v1/"+ROOT;
+const DEL={__del:1};
+class FieldPath{constructor(...p){this.p=p}str(){return this.p.map(x=>/^[A-Za-z_][A-Za-z_0-9]*$/.test(x)?x:"`"+String(x).replace(/\\/g,"\\\\").replace(/`/g,"\\`")+"`").join(".")}}
+const enc=v=>v===null||v===undefined?{nullValue:null}:typeof v=="boolean"?{booleanValue:v}:typeof v=="number"?(Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v}):typeof v=="string"?{stringValue:v}:Array.isArray(v)?{arrayValue:{values:v.map(enc)}}:{mapValue:{fields:encF(v)}};
+const encF=o=>{const f={};for(const k in o){if(o[k]===undefined||o[k]===DEL)continue;f[k]=enc(o[k])}return f};
+const dec=x=>"stringValue"in x?x.stringValue:"integerValue"in x?Number(x.integerValue):"doubleValue"in x?x.doubleValue:"booleanValue"in x?x.booleanValue:"nullValue"in x?null:"mapValue"in x?decF(x.mapValue.fields||{}):"arrayValue"in x?(x.arrayValue.values||[]).map(dec):"timestampValue"in x?x.timestampValue:null;
+const decF=f=>{const o={};for(const k in f)o[k]=dec(f[k]);return o};
+const E=(code,message)=>Object.assign(new Error(message||code),{code});
+async function call(method,url,body,retry){let tok=null;if(auth.currentUser){try{tok=await auth.currentUser.getIdToken(!!retry)}catch(e){}}
+ const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),20000);let r;
+ try{r=await fetch(url,{method,headers:Object.assign({"Content-Type":"application/json"},tok?{Authorization:"Bearer "+tok}:{}),body:body?JSON.stringify(body):undefined,signal:ctl.signal})}
+ catch(e){throw E("unavailable","Sunucuya ulaşılamadı")}finally{clearTimeout(t)}
+ if(r.status==401&&!retry&&tok)return call(method,url,body,1);
+ if(r.ok)return r.status==204?{}:r.json();
+ let m="";try{m=(await r.json()).error.message}catch(e){}
+ throw E(r.status==403?"permission-denied":r.status==404?"not-found":r.status==429?"resource-exhausted":r.status==400?"invalid-argument":r.status==401?"unauthenticated":"unavailable",m)}
+const W=(id,doc)=>({id,exists:()=>!!doc,data:()=>doc?decF(doc.fields||{}):undefined});
+const enc1=s=>s.split("/").map(encodeURIComponent).join("/");
+async function getDoc(ref){try{const d=await call("GET",BASE+"/"+enc1(ref.path));return W(ref.id,d)}catch(e){if(e.code=="not-found")return W(ref.id,null);throw e}}
+async function getDocs(c){let docs=[],tok="";do{const d=await call("GET",BASE+"/"+enc1(c.path)+"?pageSize=300"+(tok?"&pageToken="+encodeURIComponent(tok):""));(d.documents||[]).forEach(x=>docs.push(W(x.name.split("/").pop(),x)));tok=d.nextPageToken||""}while(tok);return{docs,size:docs.length,forEach:f=>docs.forEach(f)}}
+function mkWrite(ref,data,o){const w={update:{name:ROOT+"/"+ref.path,fields:encF(data)}};
+ if(o&&o.mergeFields){w.updateMask={fieldPaths:o.mergeFields.map(f=>typeof f=="string"?f:f.str())};
+   /* mergeFields: alan yolundaki değeri iç içe nesneden bul; deleteField ise alanı yazma (silinir) */
+   const fields={};for(const f of o.mergeFields){const p=typeof f=="string"?f.split("."):f.p;let v=data;for(const k of p)v=v==null?undefined:v[k];if(v===DEL||v===undefined)continue;let cur=fields;for(let i=0;i<p.length-1;i++){cur[p[i]]=cur[p[i]]||{mapValue:{fields:{}}};cur=cur[p[i]].mapValue.fields}cur[p[p.length-1]]=enc(v)}w.update.fields=fields}
+ else if(o&&o.merge){w.updateMask={fieldPaths:Object.keys(data).map(k=>new FieldPath(k).str())}}
+ return w}
+const SUBS=new Set();
+async function commit(writes){await call("POST",BASE.replace(/\/documents$/,"/documents:commit"),{writes});setTimeout(refreshAll,300)}
+async function run(s){if(s.busy)return;s.busy=1;try{const v=s.coll?await getDocs(s.ref):await getDoc(s.ref);const key=JSON.stringify(s.coll?v.docs.map(d=>[d.id,d.data()]):v.data()||null);s.fails=0;if(key!==s.last){s.last=key;s.next(v)}}
+ catch(e){s.fails=(s.fails||0)+1;if(s.last===undefined&&s.fails>=3){SUBS.delete(s);s.err&&s.err(e)}else if(s.last===undefined)setTimeout(()=>{s.busy=0;run(s)},2000)}
+ finally{s.busy=0}}
+function refreshAll(){SUBS.forEach(run)}
+setInterval(()=>{if(document.visibilityState=="visible")refreshAll()},60000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState=="visible")refreshAll()});
+window.FB={app,auth,db:{},FieldPath,deleteField:()=>DEL,refresh:refreshAll,
+ doc:(d,...p)=>({path:p.join("/"),id:p[p.length-1]}),collection:(d,...p)=>({path:p.join("/"),coll:1}),
+ getDoc,getDocs,
+ setDoc:(ref,data,o)=>commit([mkWrite(ref,data,o)]),
+ deleteDoc:ref=>commit([{delete:ROOT+"/"+ref.path}]),
+ writeBatch:()=>{const ops=[];return{set:(r,d,o)=>ops.push(mkWrite(r,d,o)),commit:()=>ops.length?commit(ops):Promise.resolve()}},
+ onSnapshot:(ref,next,err)=>{const s={ref,coll:!!ref.coll,next,err};SUBS.add(s);run(s);return()=>SUBS.delete(s)},
  signIn:(e,p)=>auth.signInWithEmailAndPassword(e,p),signOut:()=>auth.signOut(),createFirst:(e,p)=>auth.createUserWithEmailAndPassword(e,p),
  async createUser(e,p){const a2=firebase.initializeApp(C,"ek"+Date.now());try{const cr=await a2.auth().createUserWithEmailAndPassword(e,p);await a2.auth().signOut();return cr.user.uid}finally{await a2.delete()}},
  async changePw(o,n){const u=auth.currentUser;await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,o));await u.updatePassword(n)}};
